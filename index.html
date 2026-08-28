@@ -16,9 +16,9 @@
         .finish-barrier { position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%); width: 240px; height: 6px; background: #38ef7d; box-shadow: 0 0 10px #38ef7d; z-index: 2; }
         .challenge-card { position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; z-index: 5; will-change: transform, opacity; }
         .card-emoji { font-size: 5rem; }
-        .card-word-box { background: #ffffff; color: #333; padding: 8px 24px; border-radius: 16px; border: 3px solid #ffcc00; box-shadow: 0 6px 0 #cc9900; margin-top: 5px; text-align: center; display: flex; flex-direction: column; align-items: center; }
-        .card-zh { font-size: 2.3rem; font-weight: bold; color: #2b579a; line-height: 1; }
-        .card-bopo { font-size: 1.1rem; color: #777; font-weight: bold; margin-top: 2px; letter-spacing: 1px; }
+        .card-word-box { background: #ffffff; color: #333; padding: 8px 24px; border-radius: 16px; border: 3px solid #ffcc00; box-shadow: 0 6px 0 #cc9900; margin-top: 5px; text-align: center; display: flex; flex-direction: column; align-items: center; min-width: 140px; }
+        .card-zh { font-size: 2.3rem; font-weight: bold; color: #2b579a; line-height: 1.1; }
+        .card-bopo { font-size: 1.1rem; color: #666; font-weight: bold; margin-top: 5px; letter-spacing: 1px; }
         .card-approach { animation: cardRush 7s linear forwards; }
         .card-fallback { transition: transform 0.4s ease-in, opacity 0.4s; transform: translateX(-50%) scale(0.1) translateY(-320px) !important; opacity: 0.3; }
         .bottom-area { padding: 20px; text-align: center; background: rgba(0,0,0,0.4); z-index: 10; }
@@ -30,6 +30,8 @@
             100% { transform: translateX(-50%) scale(1.1) translateY(-10px); opacity: 1; }
         }
     </style>
+    <!-- 引入外部中文注音字庫檔案 -->
+    <script src="zh-words.js"></script>
 </head>
 <body>
     <div class="phone-canvas">
@@ -37,7 +39,7 @@
             <span id="level-num">關卡: 1 / 30</span>
             <span id="score-num">得分: 0 分</span>
         </div>
-        <div id="subtitle" class="speech-subtitle">點擊下方按鈕開始中文大挑戰！</div>
+        <div id="subtitle" class="speech-subtitle">點擊下方按鈕開始中文挑戰！</div>
         <div class="stage-3d">
             <div class="runway"></div>
             <div class="finish-barrier"></div>
@@ -54,15 +56,6 @@
         </div>
     </div>
     <script>
-        // 小一必學常用字詞庫 (水果、動物、大自然、身體部位、生活用品)
-        const wordList = [
-            {word:'蘋果',bopo:'ㄆㄧㄥˊ ㄍㄨㄛˇ',emoji:'🍎'},{word:'香蕉',bopo:'ㄒㄧㄢㄍ ㄐㄧㄠ',emoji:'🍌'},{word:'西瓜',bopo:'ㄒㄧ ㄍㄨㄚ',emoji:'🍉'},{word:'草莓',bopo:'ㄘㄠˇ ㄇㄟˊ',emoji:'🍓'},{word:'葡萄',bopo:'ㄆㄨˊ ㄊㄠˊ',emoji:'🍇'},
-            {word:'獅子',bopo:'ㄕ ㄗ˙',emoji:'🦁'},{word:'老虎',bopo:'ㄌㄠˇ ㄏㄨˇ',emoji:'🐯'},{word:'大象',bopo:'ㄉㄚˋ ㄒㄧㄤˋ',emoji:'🐘'},{word:'貓咪',bopo:'ㄇㄠ ㄇㄧ',emoji:'🐱'},{word:'小狗',bopo:'ㄒㄧㄠˇ ㄍㄡˇ',emoji:'🐶'},
-            {word:'兔子',bopo:'ㄊㄨˋ ㄗ˙',emoji:'🐰'},{word:'小魚',bopo:'ㄒㄧㄠˇ ㄩˊ',emoji:'🐟'},{word:'青蛙',bopo:'ㄑㄧㄥ ㄨㄚ',emoji:'🐸'},{word:'蝴蝶',bopo:'ㄏㄨˊ ㄉㄧㄝˊ',emoji:'🦋'},{word:'小鳥',bopo:'ㄒㄧㄠˇ ㄋㄧㄠˇ',emoji:'🐦'},
-            {word:'太陽',bopo:'ㄊㄞˋ ㄧㄤˊ',emoji:'☀️'},{word:'月亮',bopo:'ㄩㄝˋ ㄌㄧㄤˋ',emoji:'🌙'},{word:'星星',bopo:'ㄒㄧㄥ ㄒㄧㄥ',emoji:'⭐'},{word:'白雲',bopo:'ㄅㄞˊ ㄩㄣˊ',emoji:'☁️'},{word:'大樹',bopo:'ㄉㄚˋ ㄕㄨˋ',emoji:'🌳'},
-            {word:'紅花',bopo:'ㄏㄨˊ ㄏㄨㄚ',emoji:'🌸'},{word:'眼睛',bopo:'ㄧㄢˇ ㄐㄧㄥ',emoji:'👀'},{word:'耳朵',bopo:'ㄦˇ ㄉㄨㄛ˙',emoji:'👂'},{word:'雙手',bopo:'ㄕㄨㄢㄍ ㄕㄡˇ',emoji:'✋'},{word:'雙腳',bopo:'ㄕㄨㄢㄍ ㄐㄧㄠˇ',emoji:'🦶'},
-            {word:'汽車',bopo:'ㄑㄧˋ ㄔㄜ',emoji:'🚗'},{word:'飛機',bopo:'ㄈㄟ ㄐㄧ',emoji:'✈️'},{word:'書本',bopo:'ㄕㄨ ㄅㄣˇ',emoji:'📖'},{word:'鉛筆',bopo:'ㄑㄧㄢ ㄅㄧˇ',emoji:'✏️'},{word:'書包',bopo:'ㄕㄨ ㄅㄠ',emoji:'🎒'}
-        ];
         let currentIdx = 0, score = 0, isPlaying = false, recognition = null, audioCtx = null;
         const actionBtn = document.getElementById('action-btn'), subtitleTxt = document.getElementById('subtitle'), wordZhTxt = document.getElementById('word-zh'), wordBopoTxt = document.getElementById('word-bopo'), emojiTxt = document.getElementById('emoji'), levelTxt = document.getElementById('level-num'), scoreTxt = document.getElementById('score-num'), challengeCard = document.getElementById('challenge-card');
         
@@ -70,20 +63,19 @@
         
         function playSound(type) { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); const osc = audioCtx.createOscillator(), gain = audioCtx.createGain(); osc.connect(gain); gain.connect(audioCtx.destination); if (type === 'correct') { osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.1); gain.gain.setValueAtTime(0.2, audioCtx.currentTime); osc.start(); osc.stop(audioCtx.currentTime + 0.25); } else { osc.type = 'triangle'; osc.frequency.setValueAtTime(220, audioCtx.currentTime); osc.frequency.setValueAtTime(146, audioCtx.currentTime + 0.1); gain.gain.setValueAtTime(0.2, audioCtx.currentTime); osc.start(); osc.stop(audioCtx.currentTime + 0.3); } }
         
-        function initSpeechEngine() { const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition; if (!SpeechRecognition) { subtitleTxt.innerText = '瀏覽器不支援語音辨識，請用 Chrome！'; return false; } recognition = new SpeechRecognition(); recognition.lang = 'zh-TW'; recognition.interimResults = false; recognition.continuous = false; recognition.onstart = function() { if (isPlaying) subtitleTxt.innerText = '🎤 正在聆聽，請大聲讀出「' + wordList[currentIdx].word + '」！'; }; recognition.onresult = function(event) { if (!isPlaying) return; let userSpeech = event.results[0][0].transcript; if (userSpeech) { subtitleTxt.innerText = '🗣️ 聽到聲音: "' + userSpeech + '"'; let target = wordList[currentIdx].word; if (userSpeech.includes(target) || target.includes(userSpeech)) { handleCorrectAnswer(); } } }; recognition.onend = function() { if (isPlaying) { setTimeout(function() { try { recognition.start(); } catch(e) {} }, 50); } }; recognition.onerror = function(event) { console.log('Engine Error:', event.error); }; return true; }
+        function initSpeechEngine() { const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition; if (!SpeechRecognition) { subtitleTxt.innerText = '瀏覽器不支援語音辨識，請用 Chrome！'; return false; } recognition = new SpeechRecognition(); recognition.lang = 'zh-TW'; recognition.interimResults = false; recognition.continuous = false; recognition.onstart = function() { if (isPlaying) subtitleTxt.innerText = '🎤 正在聆聽，請大聲讀出「' + window.wordList[currentIdx].word + '」！'; }; recognition.onresult = function(event) { if (!isPlaying) return; let userSpeech = event.results[0][0].transcript; if (userSpeech) { subtitleTxt.innerText = '🗣️ 聽到聲音: "' + userSpeech + '"'; let target = window.wordList[currentIdx].word; if (userSpeech.includes(target) || target.includes(userSpeech)) { handleCorrectAnswer(); } } }; recognition.onend = function() { if (isPlaying) { setTimeout(function() { try { recognition.start(); } catch(e) {} }, 50); } }; recognition.onerror = function(event) { console.log('Engine Error:', event.error); }; return true; }
         
         function toggleGame() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if (!recognition && !initSpeechEngine()) return; if (isPlaying) { isPlaying = false; actionBtn.innerText = 'START 挑戰開始'; actionBtn.classList.remove('active'); subtitleTxt.innerText = '遊戲已暫停'; challengeCard.classList.remove('card-approach'); recognition.stop(); } else { isPlaying = true; actionBtn.innerText = '錄音中... (點擊暫停)'; actionBtn.classList.add('active'); currentIdx = 0; score = 0; scoreTxt.innerText = '得分: 0 分'; updateCardUI(); try { recognition.start(); } catch(e) {} } }
         
-        function handleCorrectAnswer() { playSound('correct'); score += 10; scoreTxt.innerText = '得分: ' + score + ' 分'; subtitleTxt.innerText = '🎉 太棒了！唸得非常正確！'; challengeCard.classList.remove('card-approach'); isPlaying = false; if (recognition) recognition.stop(); setTimeout(function() { currentIdx++; if (currentIdx < wordList.length) { isPlaying = true; updateCardUI(); try { recognition.start(); } catch(e) {} } else { displayVictory(); } }, 1200); }
+        function handleCorrectAnswer() { playSound('correct'); score += 10; scoreTxt.innerText = '得分: ' + score + ' 分'; subtitleTxt.innerText = '🎉 太棒了！唸得非常正確！'; challengeCard.classList.remove('card-approach'); isPlaying = false; if (recognition) recognition.stop(); setTimeout(function() { currentIdx++; if (currentIdx < window.wordList.length) { isPlaying = true; updateCardUI(); try { recognition.start(); } catch(e) {} } else { displayVictory(); } }, 1200); }
         
         function handleWrongAnswer() { playSound('wrong'); subtitleTxt.innerText = '❌ 沒對喔！退回山頂重新出發！'; isPlaying = false; if (recognition) recognition.stop(); challengeCard.classList.remove('card-approach'); challengeCard.classList.add('card-fallback'); setTimeout(function() { challengeCard.classList.remove('card-fallback'); isPlaying = true; updateCardUI(); try { recognition.start(); } catch(e) {} }, 400); }
         
-        function updateCardUI() { levelTxt.innerText = '關卡: ' + (currentIdx + 1) + ' / ' + wordList.length; wordZhTxt.innerText = wordList[currentIdx].word; wordBopoTxt.innerText = wordList[currentIdx].bopo; emojiTxt.innerText = wordList[currentIdx].emoji; challengeCard.classList.remove('card-approach'); void challengeCard.offsetWidth; challengeCard.classList.add('card-approach'); }
+        function updateCardUI() { if(!window.wordList) return; levelTxt.innerText = '關卡: ' + (currentIdx + 1) + ' / ' + window.wordList.length; wordZhTxt.innerText = window.wordList[currentIdx].word; wordBopoTxt.innerText = window.wordList[currentIdx].bopo; emojiTxt.innerText = window.wordList[currentIdx].emoji; challengeCard.classList.remove('card-approach'); void challengeCard.offsetWidth; challengeCard.classList.add('card-approach'); }
         
-        function displayVictory() { isPlaying = false; if (recognition) recognition.stop(); emojiTxt.innerText = '🏆'; wordZhTxt.innerText = '大功告成！'; wordBopoTxt.innerText = 'ㄍㄨㄥ ㄒㄧˇ ㄨㄢˊ ㄔㄥˊ'; subtitleTxt.innerText = '🔥 太強了！你完成了 30 關中文朗讀挑戰！'; actionBtn.style.display = 'none'; }
+        function displayVictory() { isPlaying = false; if (recognition) recognition.stop(); emojiTxt.innerText = '🏆'; wordZhTxt.innerText = '大功告成！'; wordBopoTxt.innerText = 'ㄍㄨㄥ ㄒㄧˇ ㄨㄢˊ ㄔˊ'; subtitleTxt.innerText = '🔥 太強了！你完成了 30 關中文朗讀挑戰！'; actionBtn.style.display = 'none'; }
         
-        updateCardUI();
+        setTimeout(updateCardUI, 200);
     </script>
 </body>
 </html>
-
